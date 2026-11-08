@@ -3,7 +3,7 @@ import { Patient } from "@/types/emr";
 export const INITIAL_DEMO_PATIENTS: Patient[] = [
   {
     id: "pat-001",
-    hospitalNumber: "TPH-2026-00101",
+    hospitalNumber: "SIM-2026-00101",
     fullName: "Adewale Okafor",
     age: 34,
     gender: "Male",
@@ -159,7 +159,7 @@ export const INITIAL_DEMO_PATIENTS: Patient[] = [
   },
   {
     id: "pat-002",
-    hospitalNumber: "TPH-2026-00102",
+    hospitalNumber: "SIM-2026-00102",
     fullName: "Fatima Bello",
     age: 28,
     gender: "Female",
@@ -244,7 +244,7 @@ export const INITIAL_DEMO_PATIENTS: Patient[] = [
   },
   {
     id: "pat-003",
-    hospitalNumber: "TPH-2026-00103",
+    hospitalNumber: "SIM-2026-00103",
     fullName: "Chief Chukwudi Nnamdi",
     age: 56,
     gender: "Male",
@@ -362,7 +362,7 @@ export const INITIAL_DEMO_PATIENTS: Patient[] = [
   },
   {
     id: "pat-004",
-    hospitalNumber: "TPH-2026-00104",
+    hospitalNumber: "SIM-2026-00104",
     fullName: "Amina Yusuf",
     age: 22,
     gender: "Female",
@@ -398,7 +398,7 @@ export const INITIAL_DEMO_PATIENTS: Patient[] = [
   },
   {
     id: "pat-005",
-    hospitalNumber: "TPH-2026-00105",
+    hospitalNumber: "SIM-2026-00105",
     fullName: "Babatunde Adeleke",
     age: 45,
     gender: "Male",

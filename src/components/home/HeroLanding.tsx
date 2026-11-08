@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
-import { useAuth, DEFAULT_ADMIN_TEACHER_ACCOUNTS } from "@/context/AuthContext";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useTenant } from "@/context/TenantContext";
 import { RoleId, HOSPITAL_ROLES } from "@/types/emr";
 import {
   LogIn,
@@ -10,13 +11,12 @@ import {
   Sparkles,
   ArrowRight,
   ShieldAlert,
-  KeyRound,
   GraduationCap,
-  Users,
 } from "lucide-react";
 
 export function HeroLanding() {
   const { login, signup, loginTeacher, enterDemoMode, authNotice } = useAuth();
+  const tenant = useTenant();
 
   const [activeTab, setActiveTab] = useState<"signin" | "signup" | "teacher">("signin");
 
@@ -31,10 +31,8 @@ export function HeroLanding() {
   const [signupPassword, setSignupPassword] = useState("");
 
     // Teacher / Admin sign-in state (kept separate so these boxes always start empty)
-  const [selectedTeacher, setSelectedTeacher] = useState("");
   const [teacherEmail, setTeacherEmail] = useState("");
   const [teacherPassword, setTeacherPassword] = useState("");
-  const teacherPasswordRef = useRef<HTMLInputElement>(null);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -70,35 +68,13 @@ export function HeroLanding() {
 
 
     // A teacher picks their name, then types their own password (nothing is auto-filled)
-  const handleSelectTeacher = (fullName: string) => {
-    setSelectedTeacher(fullName);
-    setTeacherPassword("");
-    setErrorMessage("");
-    setTimeout(() => teacherPasswordRef.current?.focus(), 0);
-  };
-
   const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
-
-    // Work out which teacher profile this is (by picked name, or by typed name / email)
-    const typed = (selectedTeacher || teacherEmail).trim().toLowerCase();
-    const profile = DEFAULT_ADMIN_TEACHER_ACCOUNTS.find(
-      (t) => t.fullName.toLowerCase() === typed || (t.email && t.email.toLowerCase() === typed)
-    );
-    if (!profile) {
-      setErrorMessage("No teacher profile found for that name or email. Pick your name from the list.");
-      return;
-    }
-
     setLoading(true);
-    // The server checks the password and starts the teacher session
-    const res = await loginTeacher(profile.fullName, teacherPassword);
+    const res = await loginTeacher(teacherEmail.trim(), teacherPassword);
     setLoading(false);
-    if (!res.success) {
-      setErrorMessage(res.error || "Authentication failed.");
-      setTeacherPassword("");
-    }
+    if (!res.success) { setErrorMessage(res.error || "Authentication failed."); setTeacherPassword(""); }
   };
 
   return (
@@ -106,25 +82,21 @@ export function HeroLanding() {
       {/* Background Campus Photo with Deep Blue Academic Overlay */}
       <div
         className="fixed inset-0 z-0 bg-cover bg-center opacity-30 mix-blend-luminosity scale-105 pointer-events-none"
-        style={{ backgroundImage: "url('/trinity-campus.png')" }}
+        style={{ backgroundImage: tenant.hasHero ? `url('/api/tenants/${tenant.slug}/asset/hero?v=${tenant.brandVersion}')` : "none" }}
       />
-      <div className="fixed inset-0 z-0 bg-gradient-to-b from-[#071B33]/92 via-[#0B2545]/90 to-[#051426]/98 pointer-events-none" />
+      <div className="fixed inset-0 z-0 bg-gradient-to-b from-navy-dark/92 via-navy/90 to-navy-deep/98 pointer-events-none" />
 
       {/* Topmast Banner */}
-      <header className="relative z-10 border-b border-paper-border/60 bg-[#071B33]/80 backdrop-blur-md">
+      <header className="relative z-10 border-b border-paper-border/60 bg-navy-dark/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <img
-              src="/trinity-logo.png"
-              alt="Trinity University"
-              className="h-11 sm:h-12 w-auto object-contain rounded-[2px] shadow-sm bg-white/95 p-0.5"
-            />
+            {tenant.hasLogo ? <img src={`/api/tenants/${tenant.slug}/asset/logo?v=${tenant.brandVersion}`} alt={tenant.name} className="h-11 sm:h-12 w-auto object-contain rounded-[2px] shadow-sm bg-white/95 p-0.5" /> : <span aria-hidden="true" className="grid h-11 w-11 place-items-center rounded bg-brand font-bold text-navy-dark">{tenant.name.slice(0, 2).toUpperCase()}</span>}
             <div className="min-w-0">
               <p className="font-sans text-sm sm:text-base font-bold text-white tracking-wide">
-                Trinity University
+                {tenant.name}
               </p>
               <p className="text-[11px] sm:text-xs text-amber-300 font-medium">
-                Faculty of Nursing & Health Sciences<span className="hidden sm:inline"> &bull; Yaba, Lagos</span>
+                {tenant.department || "Clinical Training"}<span className="hidden sm:inline">{tenant.location ? ` • ${tenant.location}` : ""}</span>
               </p>
             </div>
           </div>
@@ -146,7 +118,7 @@ export function HeroLanding() {
         {/* Sign In & Sign Up Central Card */}
         <div className="w-full max-w-xl bg-white text-charcoal border-2 border-brand shadow-2xl overflow-hidden rounded-[2px]">
           {/* Card Tabs */}
-          <div className="grid grid-cols-3 bg-[#0B2545] border-b border-paper-border text-xs font-mono">
+          <div className="grid grid-cols-3 bg-navy border-b border-paper-border text-xs font-mono">
             <button
               type="button"
               onClick={() => {
@@ -196,7 +168,7 @@ export function HeroLanding() {
             </button>
           </div>
 
-          <div className="p-5 sm:p-7 space-y-5 bg-[#FAFCFF]">
+          <div className="p-5 sm:p-7 space-y-5 bg-paper-warm">
             {/* Error message alert */}
             {errorMessage && (
               <div
@@ -345,53 +317,8 @@ export function HeroLanding() {
                   </div>
                 </div>
 
-                {/* Pick your name (no emails or passwords are shown) */}
-                <div className="space-y-2">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-charcoal-muted block">
-                    Select your name:
-                  </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-44 overflow-y-auto pr-1">
-                    {DEFAULT_ADMIN_TEACHER_ACCOUNTS.map((adm) => {
-                      const isSelected = selectedTeacher === adm.fullName;
-                      return (
-                        <button
-                          key={adm.id}
-                          type="button"
-                          aria-pressed={isSelected}
-                          onClick={() => handleSelectTeacher(adm.fullName)}
-                          className={`p-2.5 text-left border text-xs font-bold text-navy-dark truncate transition-colors ${
-                            isSelected
-                              ? "border-brand bg-amber-50"
-                              : "border-slate-200 hover:border-brand bg-white hover:bg-amber-50"
-                          }`}
-                        >
-                          {adm.fullName}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
                 <form onSubmit={handleTeacherLogin} className="space-y-3">
-                  {selectedTeacher ? (
-                    <div className="flex items-center justify-between gap-2 p-2.5 bg-slate-50 border border-slate-200">
-                      <span className="text-charcoal">
-                        Signing in as <strong>{selectedTeacher}</strong>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedTeacher("");
-                          setTeacherPassword("");
-                          setErrorMessage("");
-                        }}
-                        className="underline text-[11px] text-charcoal-muted hover:text-charcoal shrink-0"
-                      >
-                        Change
-                      </button>
-                    </div>
-                  ) : (
-                    <div>
+                  <div>
                       <label
                         htmlFor="teacher-email"
                         className="block font-mono text-[10px] uppercase text-charcoal-muted mb-1 font-bold"
@@ -402,25 +329,23 @@ export function HeroLanding() {
                         id="teacher-email"
                         required
                         type="email"
-                        autoComplete="off"
+                        autoComplete="email"
                         value={teacherEmail}
                         onChange={(e) => setTeacherEmail(e.target.value)}
                         placeholder="Enter your teacher email address"
                         className="w-full p-2.5 bg-white border border-slate-300 focus:border-brand focus:ring-1 focus:ring-brand text-charcoal font-sans text-xs outline-none"
                       />
                     </div>
-                  )}
 
                   <div>
                     <label
                       htmlFor="teacher-password"
                       className="block font-mono text-[10px] uppercase text-charcoal-muted mb-1 font-bold"
                     >
-                      Admin Password *
+                        Password *
                     </label>
                     <input
                       id="teacher-password"
-                      ref={teacherPasswordRef}
                       required
                       type="password"
                       autoComplete="current-password"
@@ -434,10 +359,10 @@ export function HeroLanding() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 bg-[#0B2545] hover:bg-[#071B33] text-amber-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-brand"
+                    className="w-full py-2.5 bg-navy hover:bg-navy-dark text-amber-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-colors border border-brand"
                   >
                     <ShieldCheck className="w-4 h-4 text-brand" />
-                    <span>{loading ? "Signing in..." : "Sign In as Teacher / Admin"}</span>
+                    <span>{loading ? "Signing in..." : "Sign In as Teacher"}</span>
                   </button>
                 </form>
               </div>
@@ -448,10 +373,10 @@ export function HeroLanding() {
         {/* Product Name Boldly Written Below Sign-In and Sign-Up */}
         <div className="text-center space-y-3 mt-8 sm:mt-10 max-w-3xl mx-auto">
           <h1 className="font-sans text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight uppercase leading-tight drop-shadow-md">
-            Trinity University Hospital EHR
+            {tenant.hospitalName}
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-amber-300 font-semibold tracking-wide uppercase">
-            Clinical Data Flow & Patient Journey System
+            {tenant.tagline}
           </p>
           <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
             Learn how medical records flow seamlessly across Reception, Nurse Triage, Physician Consultation, Laboratory Diagnostics, Radiology, and Inpatient/Treatment Nursing.
@@ -472,27 +397,27 @@ export function HeroLanding() {
 
           {/* Clinical Pipeline Flow Diagram */}
           <div className="pt-4 flex flex-wrap items-center justify-center gap-1.5 text-[11px] font-mono text-slate-300">
-            <span className="px-2 py-1 bg-[#0B2545] border border-paper-border text-amber-300">
+            <span className="px-2 py-1 bg-navy border border-paper-border text-amber-300">
               Reception
             </span>
             <span>&rarr;</span>
-            <span className="px-2 py-1 bg-[#0B2545] border border-paper-border text-white">
+            <span className="px-2 py-1 bg-navy border border-paper-border text-white">
               Triage
             </span>
             <span>&rarr;</span>
-            <span className="px-2 py-1 bg-[#0B2545] border border-paper-border text-white">
+            <span className="px-2 py-1 bg-navy border border-paper-border text-white">
               Doctor
             </span>
             <span>&rarr;</span>
-            <span className="px-2 py-1 bg-[#0B2545] border border-paper-border text-white">
+            <span className="px-2 py-1 bg-navy border border-paper-border text-white">
               Lab & Radiology
             </span>
             <span>&rarr;</span>
-            <span className="px-2 py-1 bg-[#0B2545] border border-paper-border text-white">
+            <span className="px-2 py-1 bg-navy border border-paper-border text-white">
               Treatment
             </span>
             <span>&rarr;</span>
-            <span className="px-2 py-1 bg-[#0B2545] border border-paper-border text-amber-300">
+            <span className="px-2 py-1 bg-navy border border-paper-border text-amber-300">
               Discharge
             </span>
           </div>
@@ -500,13 +425,13 @@ export function HeroLanding() {
       </main>
 
       {/* Hero Footer */}
-      <footer className="relative z-10 border-t border-paper-border/50 bg-[#051426]/90 py-4 text-center text-xs text-slate-400">
+      <footer className="relative z-10 border-t border-paper-border/50 bg-navy-deep/90 py-4 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2 text-[11px]">
           <p>
-            &copy; {new Date().getFullYear()} Trinity University &bull; City Campus: Off Alara Street (Near Queen&apos;s College), Yaba, Lagos.
+            &copy; {new Date().getFullYear()} {tenant.name}{tenant.location ? ` • ${tenant.location}` : ""}.
           </p>
           <p className="font-mono text-amber-300">
-            Faculty of Nursing & Health Sciences EMR Directorate
+            {tenant.department || "Clinical Training Workspace"}
           </p>
         </div>
       </footer>

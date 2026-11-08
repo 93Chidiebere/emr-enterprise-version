@@ -7,8 +7,8 @@ export type TenantStatus = "active" | "suspended";
 export interface Tenant {
   id: string;
   slug: string;
-  name: string; // institution, e.g. "Trinity University"
-  hospitalName: string; // the simulation's name, e.g. "Trinity University Hospital EHR"
+  name: string; // institution, for example a university or training provider
+  hospitalName: string; // name of the institution's simulated training hospital
   department: string; // e.g. "Faculty of Nursing & Health Sciences"
   location: string;
   tagline: string;

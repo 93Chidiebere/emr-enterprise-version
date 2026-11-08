@@ -4,6 +4,7 @@ import React, { useId, useState } from "react";
 import { useEMR } from "@/context/EMRContext";
 import { Patient, Department, DEPARTMENTS_METADATA } from "@/types/emr";
 import { Search, ArrowRightLeft, FileSpreadsheet, AlertTriangle } from "lucide-react";
+import { useTenant } from "@/context/TenantContext";
 
 interface MasterDirectoryWorkstationProps {
   onOpenDossier: (patient: Patient) => void;
@@ -15,6 +16,7 @@ export function MasterDirectoryWorkstation({
   onOpenTransfer,
 }: MasterDirectoryWorkstationProps) {
   const { patients, filterDepartment, setFilterDepartment } = useEMR();
+  const tenant = useTenant();
   const [query, setQuery] = useState("");
   const searchId = useId();
 
@@ -36,7 +38,7 @@ export function MasterDirectoryWorkstation({
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-brand" />
             <h2 className="font-serif text-lg sm:text-xl font-bold text-charcoal">
-              Trinity University Hospital EHR — Master Clinical Directory
+              {tenant.hospitalName} — Master Clinical Directory
             </h2>
           </div>
           <p className="hidden sm:block text-xs text-charcoal-muted mt-0.5">

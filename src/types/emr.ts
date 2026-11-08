@@ -32,6 +32,7 @@ export interface UserAccount {
   email?: string;
   assignedRole: RoleId;
   isAdmin?: boolean;
+  isOwner?: boolean;
   isSuperAdmin?: boolean;
   password?: string;
   createdAt: string;
@@ -217,7 +218,7 @@ export const HOSPITAL_ROLES: RoleConfig[] = [
     title: "Reception Officer",
     department: "RECEPTION",
     cadre: "Health Records & Information",
-    description: "Enrolls new patients, issues Trinity University Hospital EHR record numbers, and directs visitors to relevant stations.",
+    description: "Enrolls simulated patients, issues training record numbers, and directs visitors to relevant stations.",
     badge: "REC",
   },
   {

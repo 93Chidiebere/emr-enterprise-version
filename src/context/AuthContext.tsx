@@ -2,79 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { UserAccount, RoleId } from "@/types/emr";
-
-/**
- * Teacher / admin PROFILES shown on the "Select your name" list.
- * These hold no passwords: teachers type the password that the administrator set in
- * Vercel (TEACHER_PASSWORD), and the server checks it. Student accounts live in the database.
- */
-export const DEFAULT_ADMIN_TEACHER_ACCOUNTS: UserAccount[] = [
-  {
-    id: "adm-001",
-    fullName: "Chidiebere (Super Admin)",
-    email: "vchidiebere.vc@gmail.com",
-    assignedRole: "director",
-    isAdmin: true,
-    isSuperAdmin: true,
-    createdAt: "2026-10-20T00:00:00Z",
-  },
-  {
-    id: "adm-002",
-    fullName: "Chidiebere",
-    email: "vincent.chidiebere@outlook.com",
-    assignedRole: "director",
-    isAdmin: true,
-    createdAt: "2026-10-20T00:00:00Z",
-  },
-  {
-    id: "adm-003",
-    fullName: "Rita",
-    email: "ritaeze53@gmail.com",
-    assignedRole: "director",
-    isAdmin: true,
-    createdAt: "2026-10-20T00:00:00Z",
-  },
-  {
-    id: "adm-004",
-    fullName: "Salamah",
-    email: "salamahalawiye@gmail.com",
-    assignedRole: "director",
-    isAdmin: true,
-    createdAt: "2026-10-20T00:00:00Z",
-  },
-  {
-    id: "adm-005",
-    fullName: "Favour",
-    email: "faladefavour@gmail.com",
-    assignedRole: "director",
-    isAdmin: true,
-    createdAt: "2026-10-20T00:00:00Z",
-  },
-  {
-    id: "adm-006",
-    fullName: "Sunita",
-    email: "nytaedu@gmail.com",
-    assignedRole: "director",
-    isAdmin: true,
-    createdAt: "2026-10-20T00:00:00Z",
-  },
-  {
-    id: "adm-007",
-    fullName: "Fiyin",
-    email: "anifowosefiyin@gmail.com",
-    assignedRole: "director",
-    isAdmin: true,
-    createdAt: "2026-10-20T00:00:00Z",
-  },
-  {
-    id: "adm-008",
-    fullName: "Nancy",
-    email: "nanchelotty@gmail.com",
-    assignedRole: "director",
-    isAdmin: true,
-    createdAt: "2026-10-20T00:00:00Z",
-  },
-];
+import { useTenantSlug } from "@/context/TenantContext";
 
 type Result = { success: boolean; error?: string };
 
@@ -98,7 +26,7 @@ interface AuthContextType {
   signup: (fullName: string, role: RoleId, password: string, email: string) => Promise<Result>;
   updateEmail: (email: string) => Promise<Result>;
   /** Teacher / admin sign-in (password checked by the server). */
-  loginTeacher: (name: string, password: string) => Promise<Result>;
+  loginTeacher: (email: string, password: string) => Promise<Result>;
   logout: () => void;
   /** A student changes their own name (confirmed with their password). */
   renameAccount: (newName: string, password: string) => Promise<Result>;
@@ -115,20 +43,18 @@ interface ServerUser {
   isAdmin?: boolean;
   createdAt?: string;
   email?: string | null;
+  owner?: boolean;
 }
 
 function toAccount(u: ServerUser): UserAccount {
   // teachers: add the profile details (email / super-admin flag) from the list above
-  const profile = u.isAdmin
-    ? DEFAULT_ADMIN_TEACHER_ACCOUNTS.find((t) => t.fullName.toLowerCase() === u.fullName.toLowerCase())
-    : undefined;
   return {
     id: u.id,
     fullName: u.fullName,
     assignedRole: u.assignedRole as RoleId,
     isAdmin: !!u.isAdmin,
-    isSuperAdmin: profile?.isSuperAdmin,
-    email: u.isAdmin ? profile?.email : u.email || undefined,
+    isOwner: !!u.owner,
+    email: u.email || undefined,
     createdAt: u.createdAt || "",
   };
 }
@@ -144,6 +70,7 @@ async function postJson(url: string, body: unknown) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const tenant = useTenantSlug();
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
@@ -165,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/auth/me", { cache: "no-store" });
+        const res = await fetch(`/api/auth/me?tenant=${encodeURIComponent(tenant)}`, { cache: "no-store" });
         const json = await res.json().catch(() => ({}));
         if (!cancelled && json?.user) {
           setCurrentUser(toAccount(json.user));
@@ -179,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [tenant]);
 
   const finishLogin = (user: ServerUser, warnings: string[] = []) => {
     setCurrentUser(toAccount(user));
@@ -193,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!name.trim()) return { success: false, error: "Please enter your full name." };
     if (!password) return { success: false, error: "Please enter your password." };
     try {
-      const { res, json } = await postJson("/api/auth/student/login", { name, password });
+      const { res, json } = await postJson("/api/auth/student/login", { name, password, tenant });
       if (res.ok && json?.user) {
         finishLogin(json.user);
         return { success: true };
@@ -207,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (fullName: string, role: RoleId, password: string, email: string): Promise<Result> => {
     if (!fullName.trim()) return { success: false, error: "Full Name is required for registration." };
     try {
-      const { res, json } = await postJson("/api/auth/student/register", { name: fullName, role, password, email });
+      const { res, json } = await postJson("/api/auth/student/register", { name: fullName, role, password, email, tenant });
       if (res.ok && json?.user) {
         finishLogin(json.user);
         return { success: true };
@@ -236,9 +163,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginTeacher = async (name: string, password: string): Promise<Result> => {
+  const loginTeacher = async (email: string, password: string): Promise<Result> => {
     try {
-      const { res, json } = await postJson("/api/auth/teacher", { name, password });
+      const { res, json } = await postJson("/api/auth/teacher", { email, password, tenant });
       if (res.ok && json?.user) {
         finishLogin(json.user, Array.isArray(json.warnings) ? json.warnings : []);
         return { success: true };

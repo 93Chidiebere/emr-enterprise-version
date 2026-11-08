@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useEMR } from "@/context/EMRContext";
 import { Patient, DEPARTMENTS_METADATA } from "@/types/emr";
 import { FileText, UserPlus, ArrowRightLeft, Search, Clock } from "lucide-react";
+import { useTenant } from "@/context/TenantContext";
 
 interface ReceptionWorkstationProps {
   onOpenIntake: () => void;
@@ -18,6 +19,7 @@ export function ReceptionWorkstation({
   onOpenTransfer,
   onEditDetails,
 }: ReceptionWorkstationProps) {
+  const tenant = useTenant();
   const { patients } = useEMR();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -44,7 +46,7 @@ export function ReceptionWorkstation({
             </h2>
           </div>
           <p className="hidden sm:block text-xs text-charcoal-muted mt-0.5">
-            Register new patient charts, issue Trinity University Hospital EHR numbers, and route returning patients directly to any station.
+            Register simulated patient charts, issue institution-specific training numbers, and route returning patients directly to any station.
           </p>
         </div>
 

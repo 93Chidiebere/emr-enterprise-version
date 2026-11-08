@@ -3,6 +3,7 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { useEMR } from "@/context/EMRContext";
 import { useAuth } from "@/context/AuthContext";
+import { useTenant } from "@/context/TenantContext";
 import { HOSPITAL_ROLES, RoleId } from "@/types/emr";
 import { canSwitchRole, canUseMasterView } from "@/lib/role-access";
 import { useDialogA11y } from "@/hooks/useDialogA11y";
@@ -122,7 +123,7 @@ function RoleMenu({
             setOpen(true);
           }
         }}
-        className="flex items-center gap-2 px-3 py-1.5 min-h-[44px] sm:min-h-0 bg-[#0F325E] border border-paper-border text-white hover:border-brand transition-colors font-medium text-xs rounded-[2px]"
+        className="flex items-center gap-2 px-3 py-1.5 min-h-[44px] sm:min-h-0 bg-navy-surface border border-paper-border text-white hover:border-brand transition-colors font-medium text-xs rounded-[2px]"
       >
         <span className="font-mono px-1 bg-brand text-navy-dark font-bold text-[10px]">
           {current.badge}
@@ -146,7 +147,7 @@ function RoleMenu({
         >
           <div
             aria-hidden="true"
-            className="px-3 py-2 bg-[#0B2545] text-[11px] text-amber-300 uppercase font-mono tracking-wider font-bold"
+            className="px-3 py-2 bg-navy text-[11px] text-amber-300 uppercase font-mono tracking-wider font-bold"
           >
             Switch Active Workstation Station:
           </div>
@@ -170,7 +171,7 @@ function RoleMenu({
                   selected ? "bg-amber-50/90 font-bold" : ""
                 }`}
               >
-                <span className="font-mono px-1.5 py-0.5 bg-[#0B2545] text-amber-300 text-[10px] mt-0.5 font-bold">
+                <span className="font-mono px-1.5 py-0.5 bg-navy text-amber-300 text-[10px] mt-0.5 font-bold">
                   {r.badge}
                 </span>
                 <span className="flex-1 min-w-0">
@@ -302,6 +303,7 @@ function ResetConfirmDialog({
 /* Navbar Component                                                    */
 /* ------------------------------------------------------------------ */
 export function Navbar({ onOpenIntake }: NavbarProps) {
+  const tenant = useTenant();
   const {
     activeRole,
     setActiveRole,
@@ -331,18 +333,14 @@ export function Navbar({ onOpenIntake }: NavbarProps) {
 
   return (
     <>
-      <header className="bg-[#0B2545] border-b border-[#1E4E79] text-white md:sticky md:top-0 md:z-30 shadow-md">
+      <header className="bg-navy border-b border-navy-border text-white md:sticky md:top-0 md:z-30 shadow-md">
         {/* Topmast Institution Bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-[#1E4E79]/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-navy-border/70">
           <div className="flex items-center gap-3 min-w-0">
-            <img
-              src="/trinity-logo.png"
-              alt="Trinity University"
-              className="h-9 sm:h-12 w-auto object-contain shrink-0 rounded-[2px] bg-white p-0.5 shadow-sm"
-            />
+            {tenant.hasLogo ? <img src={`/api/tenants/${tenant.slug}/asset/logo?v=${tenant.brandVersion}`} alt={tenant.name} className="h-9 sm:h-12 w-auto object-contain shrink-0 rounded-[2px] bg-white p-0.5 shadow-sm" /> : <span aria-hidden="true" className="grid h-9 w-9 shrink-0 place-items-center rounded bg-brand font-bold text-navy-dark sm:h-12 sm:w-12">{tenant.name.slice(0, 2).toUpperCase()}</span>}
             <div className="min-w-0">
               <h1 className="font-sans text-base sm:text-xl font-bold tracking-tight text-white leading-tight">
-                Trinity University Hospital EHR
+                {tenant.hospitalName}
               </h1>
               <p className="text-[10px] sm:text-[11px] text-amber-300 font-medium tracking-wide">
                 Clinical & Hospital Data Flow Simulation
@@ -355,7 +353,7 @@ export function Navbar({ onOpenIntake }: NavbarProps) {
             {/* Live vs Demo Indicator */}
             <div
               role="status"
-              className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-300 md:border-r border-[#1E4E79] md:pr-3"
+              className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-300 md:border-r border-navy-border md:pr-3"
             >
               <Clock aria-hidden="true" className="hidden sm:block w-3.5 h-3.5 text-brand" />
               <span
@@ -374,7 +372,7 @@ export function Navbar({ onOpenIntake }: NavbarProps) {
 
             {/* Signed-in User Identity Badge */}
             {currentUser && (
-              <div className="flex items-center gap-2 pl-2.5 pr-1.5 py-1 bg-[#071B33] border border-[#1E4E79] text-xs text-white">
+              <div className="flex items-center gap-2 pl-2.5 pr-1.5 py-1 bg-navy-dark border border-navy-border text-xs text-white">
                 {currentUser.isAdmin ? (
                   <ShieldCheck aria-hidden="true" className="w-3.5 h-3.5 text-brand shrink-0" />
                 ) : (
@@ -430,7 +428,7 @@ export function Navbar({ onOpenIntake }: NavbarProps) {
                 type="button"
                 onClick={() => setResetConfirmOpen(true)}
                 title={isLive ? "Start a new class session (keeps all earlier data)" : "Restore demo data"}
-                className="flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-1.5 text-xs text-white bg-[#0F325E] hover:bg-[#15437C] border border-[#1E4E79] hover:border-brand transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-1.5 text-xs text-white bg-navy-surface hover:bg-navy-surface-hover border border-navy-border hover:border-brand transition-colors"
               >
                 <RotateCcw aria-hidden="true" className="w-3.5 h-3.5 text-brand" />
                 <span className="hidden sm:inline">{isLive ? "New Session" : "Reset Session"}</span>
@@ -441,13 +439,14 @@ export function Navbar({ onOpenIntake }: NavbarProps) {
             {/* Reports (teachers only; the server also checks the teacher login) */}
             {isLive && isTeacherOrAdmin && (
               <a
-                href="/reports"
-                className="flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-1.5 text-xs text-white bg-[#0F325E] hover:bg-[#15437C] border border-[#1E4E79] hover:border-brand transition-colors"
+                href={`/${tenant.slug}/reports`}
+                className="flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-1.5 text-xs text-white bg-navy-surface hover:bg-navy-surface-hover border border-navy-border hover:border-brand transition-colors"
               >
                 <BarChart3 aria-hidden="true" className="w-3.5 h-3.5 text-brand" />
                 <span>Reports</span>
               </a>
             )}
+            {isLive && currentUser?.isOwner && <a href={`/${tenant.slug}/settings`} className="flex items-center gap-1.5 border border-navy-border bg-navy-surface px-2.5 py-2 text-xs text-white hover:border-brand hover:bg-navy-surface-hover sm:px-3 sm:py-1.5"><Pencil aria-hidden="true" className="h-3.5 w-3.5 text-brand"/><span>Settings</span></a>}
 
             {/* Enroll New Patient Button (Front Desk, teachers and demo visitors only) */}
             {(!currentUser || currentUser.isAdmin || activeRole === "receptionist") && (
@@ -465,7 +464,7 @@ export function Navbar({ onOpenIntake }: NavbarProps) {
         </div>
 
         {/* Role Selection & Identity Banner */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex flex-col gap-2 sm:gap-3 md:flex-row md:items-center md:justify-between text-xs bg-[#071B33]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex flex-col gap-2 sm:gap-3 md:flex-row md:items-center md:justify-between text-xs bg-navy-dark">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
             <span className={`text-slate-300 font-sans uppercase tracking-wider text-[11px] items-center gap-1 ${roleSwitchAllowed ? "flex" : "hidden sm:flex"}`}>
               <UserCheck aria-hidden="true" className="w-3.5 h-3.5 text-brand" />
@@ -477,7 +476,7 @@ export function Navbar({ onOpenIntake }: NavbarProps) {
             ) : (
               <div
                 title="Your station is fixed for this class session. Your teacher can start a new session to let you change."
-                className="flex items-center gap-2 px-3 py-1.5 bg-[#0F325E] border border-paper-border text-white text-xs w-fit max-w-full"
+                className="flex items-center gap-2 px-3 py-1.5 bg-navy-surface border border-paper-border text-white text-xs w-fit max-w-full"
               >
                 <Lock aria-hidden="true" className="w-3.5 h-3.5 text-amber-300 shrink-0" />
                 <span className="font-mono px-1 bg-brand text-navy-dark font-bold text-[10px]">
@@ -510,7 +509,7 @@ export function Navbar({ onOpenIntake }: NavbarProps) {
                   ? "Locked to your signed-in account"
                   : "Type student name or ID for clinical log entries"
               }
-              className="px-2.5 py-1 text-xs bg-[#0F325E] border border-paper-border focus:border-brand text-white w-full sm:w-64 font-sans read-only:bg-[#071B33] read-only:text-slate-300"
+              className="px-2.5 py-1 text-xs bg-navy-surface border border-paper-border focus:border-brand text-white w-full sm:w-64 font-sans read-only:bg-navy-dark read-only:text-slate-300"
               placeholder="Staff Name / ID"
             />
           </div>

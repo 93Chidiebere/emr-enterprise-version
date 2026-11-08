@@ -375,7 +375,7 @@ export function EMRProvider({ children }: { children: ReactNode }) {
 
     // DEMO: local only
     const nextSeq = patients.length + 101;
-    const hospitalNumber = `TPH-2026-${String(nextSeq).padStart(5, "0")}`;
+    const hospitalNumber = `SIM-2026-${String(nextSeq).padStart(5, "0")}`;
     const newId = `pat-${Date.now()}`;
 
     const newPatient: Patient = {

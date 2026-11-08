@@ -6,6 +6,7 @@ import { Department, Patient } from "@/types/emr";
 import { UserPlus, X, Check } from "lucide-react";
 import { useDialogA11y } from "@/hooks/useDialogA11y";
 import { ageFromDateOfBirth, localDateString } from "@/lib/patient-age";
+import { useTenant } from "@/context/TenantContext";
 
 interface NewPatientModalProps {
   onClose: () => void;
@@ -32,6 +33,7 @@ export const KIN_RELATIONSHIPS = [
 ];
 
 export function NewPatientModal({ onClose, onEnrolled }: NewPatientModalProps) {
+  const tenant = useTenant();
   const { registerPatient } = useEMR();
   const dialogRef = useDialogA11y<HTMLDivElement>(onClose);
   const [fullName, setFullName] = useState("");
@@ -113,7 +115,7 @@ export function NewPatientModal({ onClose, onEnrolled }: NewPatientModalProps) {
             <div className="flex items-center gap-2">
               <UserPlus className="w-4 h-4 text-brand" />
               <h3 id="intake-dialog-title" className="font-serif text-lg font-bold text-charcoal">
-                Trinity University Hospital EHR — Patient Intake
+                {tenant.hospitalName} — Patient Intake
               </h3>
             </div>
             <p className="text-xs text-charcoal-muted mt-0.5">

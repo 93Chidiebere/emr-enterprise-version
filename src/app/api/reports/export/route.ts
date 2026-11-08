@@ -28,7 +28,7 @@ export async function GET(request: Request) {
       return new NextResponse(body, {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
-          "Content-Disposition": `attachment; filename="trinity-backup-${stamp}.json"`,
+          "Content-Disposition": `attachment; filename="institution-backup-${stamp}.json"`,
           "Cache-Control": "no-store",
         },
       });

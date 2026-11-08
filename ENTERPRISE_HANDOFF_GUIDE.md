@@ -12,11 +12,11 @@ Written at the moment work was stopped. Read sections 0 to 8 first; the rest is 
 | Product idea | Turn a working single-university hospital-workflow training simulator (the "Trinity platform") into a multi-tenant SaaS where any university or trainer registers, brands, and runs their own instance. |
 | Original platform | Live, working, in a separate GitHub repo and Vercel project. **Do not modify it.** This folder is a copy that becomes its own repo, its own Vercel project and its own database. |
 | Server side (database, auth, tenants, API routes) | Written. `npx tsc --noEmit` passes and `npm run build` passed at the last check. Tenant table creation was verified manually (registering an institution returns 201 and creates 14 prefixed tables). |
-| Server isolation test suite (`tests/tenant_api_test.py`) | Written, **never completed a successful run**. It failed on its first run because of a bug (since fixed) and has not been re-run. Running it is the first task. |
-| Browser side (pages, theming, sign-in screens, branding) | **Not started.** The UI still calls the old single-tenant endpoints and still contains hard-coded "Trinity" text and colours. **The app does not work end to end in a browser right now.** |
+| Server isolation test suite (`tests/tenant_api_test.py`) | Written, **not yet re-run** after its SQL scoping bug was fixed. Run it against a disposable dedicated database before pilot use. |
+| Browser side (pages, theming, sign-in screens, branding) | Initial multi-tenant flow is implemented locally: marketing and registration pages, slug-based tenant workspaces, tenant-aware student/teacher authentication, theme variables, owner settings for identity/assets/staff, reports routing, and a platform-owner console. Full browser and API isolation verification is still outstanding. |
 | Everything else (billing, email, compliance documents, hardening) | Not started. Plans are in sections 8 to 14. |
 
-Where exactly I stopped is in section 7. How to continue is in section 8.
+Current continuation: finish replacing any remaining legacy copy, run the tenant isolation and browser flows against a dedicated database, then create and connect the separate GitHub/Vercel resources. The current local `origin` still points to the foundation repository; do not push to it.
 
 ---
 
@@ -161,7 +161,7 @@ Done:
 3. New API routes (register institution, slug check, public assets, settings, staff, own password, platform console, tenant-aware auth).
 4. Hospital number prefix per institution (`createPatient` reads the institution's `recordPrefix`).
 
-**Not started:** every browser-side change in Phase B to F of section 8. I had just verified tenant table creation and was about to run the isolation suite and then begin the client restructure.
+**Implemented locally since the initial handoff:** root marketing and institution lookup; registration and first-owner sign-in; tenant route/layout/context; slug-aware student and teacher sign-in; institution-scoped theme variables, names, logo and hero assets; owner identity/branding and teacher management settings; platform console; reports and settings routing; neutral README and product package name. `npx tsc --noEmit` and `npm run build` pass. No tenant isolation or end-to-end browser suite has been run in this work session.
 
 ### 7.2 Test
 
@@ -199,7 +199,7 @@ Because `tid` was threaded by regex, check these by reading and by tests: `rewri
 4. Extend the suite to cover section 7.4 functions under two institutions (renames, exports, details edits, session roles, station rules) by porting the old single-tenant scripts' ideas: station locking per session, my-patients visibility, Front Desk details edit not overwriting clinical data, rename rewriting records and keeping aliases, lockout after 5 failures, email rules.
 Acceptance: green suite; running it twice on a fresh database gives identical results.
 
-### Phase B: Make the browser multi-tenant (2 to 4 days)
+### Phase B: Make the browser multi-tenant (in progress)
 1. `src/app/layout.tsx`: keep only fonts and global CSS (remove `AuthProvider`, `EMRProvider`, `FormA11yEnhancer`).
 2. Create `src/app/[tenant]/layout.tsx` (server component): load the institution with `getTenantBySlug` (call `notFound()` if missing; show a "suspended" page if suspended), render `<TenantProvider tenant={...}>` + `AuthProvider` + `EMRProvider` + `FormA11yEnhancer`, set the theme style from `buildThemeVars` on a wrapper div, and `generateMetadata` (title = hospital name, favicon = logo URL).
 3. Move `src/app/page.tsx` to `src/app/[tenant]/page.tsx` and `src/app/reports/page.tsx` to `src/app/[tenant]/reports/page.tsx`. Links to the app become `/${slug}`.

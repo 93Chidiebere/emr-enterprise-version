@@ -5,6 +5,7 @@ import { useEMR } from "@/context/EMRContext";
 import { Patient, DEPARTMENTS_METADATA } from "@/types/emr";
 import { TransferModal } from "@/components/shared/TransferModal";
 import { useDialogA11y } from "@/hooks/useDialogA11y";
+import { useTenant } from "@/context/TenantContext";
 import {
   FileText,
   Activity,
@@ -27,6 +28,7 @@ interface PatientDossierModalProps {
 }
 
 export function PatientDossierModal({ patient, onClose, readOnly = false }: PatientDossierModalProps) {
+  const tenant = useTenant();
   const dialogRef = useDialogA11y<HTMLDivElement>(onClose);
   const [activeTab, setActiveTab] = useState<
     "journey" | "vitals" | "doctor" | "labs" | "radiology" | "meds"
@@ -166,7 +168,7 @@ export function PatientDossierModal({ patient, onClose, readOnly = false }: Pati
                   Hospital Movement & Clinical Audit Trail
                 </h3>
                 <p className="text-charcoal-muted text-[11px] mt-0.5">
-                  Complete chronological ledger showing how data and care flowed across Trinity University Hospital EHR stations
+                  Complete chronological ledger showing how data and care flowed across {tenant.hospitalName} stations
                 </p>
               </div>
 

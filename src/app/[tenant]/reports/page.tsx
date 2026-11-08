@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Download, RefreshCw, ShieldAlert } from "lucide-react";
 import { HOSPITAL_ROLES } from "@/types/emr";
+import { useTenant } from "@/context/TenantContext";
 
 interface SessionInfo {
   id: string;
@@ -120,13 +121,13 @@ function Kpi({ label, value, sub }: { label: string; value: React.ReactNode; sub
 }
 
 export default function ReportsPage() {
+  const tenant = useTenant();
   const [scope, setScope] = useState<string>("");
   const [data, setData] = useState<ReportResponse | null>(null);
   const [problem, setProblem] = useState<{ title: string; detail: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [studentMsg, setStudentMsg] = useState("");
-  const [weakPassword, setWeakPassword] = useState(false);
 
   const loadStudents = useCallback(async () => {
     try {
@@ -214,14 +215,7 @@ export default function ReportsPage() {
       if (res.status === 401) {
         setProblem({
           title: "Teacher sign-in required",
-          detail:
-            "Reports are only available to teachers. Go back to the platform, choose Teachers / Admin, select your name and enter your password.",
-        });
-      } else if (res.status === 503 && json?.error === "TEACHER_AUTH_NOT_CONFIGURED") {
-        setProblem({
-          title: "Reports are not switched on yet",
-          detail:
-            "The site owner needs to add a TEACHER_PASSWORD setting in Vercel (Settings, Environment Variables) and redeploy.",
+          detail: "Reports are available to teachers at this institution. Sign in with your institution email and password, then return here.",
         });
       } else if (res.status === 503) {
         setProblem({
@@ -244,10 +238,6 @@ export default function ReportsPage() {
   useEffect(() => {
     load();
     loadStudents();
-    fetch("/api/auth/me", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((j) => setWeakPassword(Array.isArray(j?.warnings) && j.warnings.includes("teacher_password_weak")))
-      .catch(() => {});
   }, [load, loadStudents]);
 
   const s = data?.summary;
@@ -262,10 +252,10 @@ export default function ReportsPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-sans text-xl sm:text-2xl font-bold">Class Reports & Data Downloads</h1>
-            <p className="text-xs text-amber-300 font-mono">Trinity University Hospital EHR (teachers only)</p>
+            <p className="text-xs text-amber-300 font-mono">{tenant.hospitalName} (teachers only)</p>
           </div>
           <a
-            href="/"
+            href={`/${tenant.slug}`}
             className="flex items-center gap-1.5 px-3 py-2 text-xs bg-white/10 hover:bg-white/20 border border-white/20"
           >
             <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5 text-brand" />
@@ -275,12 +265,6 @@ export default function ReportsPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-5">
-        {weakPassword && (
-          <div role="alert" className="bg-red-700 text-white p-4 text-sm font-semibold">
-            Security warning: the teacher password is the old default (or too short) and is published in the public code.
-            Anyone who finds it can open these reports. Change TEACHER_PASSWORD in Vercel (Settings, Environment Variables) and redeploy.
-          </div>
-        )}
         {problem && (
           <div role="alert" className="bg-amber-50 border border-amber-300 p-5 flex gap-3">
             <ShieldAlert aria-hidden="true" className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />

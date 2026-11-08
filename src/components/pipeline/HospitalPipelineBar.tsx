@@ -37,7 +37,7 @@ export function HospitalPipelineBar() {
     patients.filter((p) => p.currentDepartment === dept).length;
 
   return (
-    <section aria-label="Live clinical flow pipeline" className={`${isMasterView ? "" : "hidden sm:block"} bg-[#071B33] border-b border-[#1E4E79] text-white`}>
+    <section aria-label="Live clinical flow pipeline" className={`${isMasterView ? "" : "hidden sm:block"} bg-navy-dark border-b border-navy-border text-white`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
@@ -58,7 +58,7 @@ export function HospitalPipelineBar() {
             className={`px-3 py-1 text-xs font-mono transition-colors border ${
               filterDepartment === "ALL"
                 ? "bg-brand text-navy-dark border-brand font-bold"
-                : "bg-[#0F325E] text-slate-300 border-[#1E4E79] hover:border-brand hover:text-white"
+                : "bg-navy-surface text-slate-300 border-navy-border hover:border-brand hover:text-white"
             }`}
           >
             All Stations ({patients.length})
@@ -82,8 +82,8 @@ export function HospitalPipelineBar() {
                 onClick={() => setFilterDepartment(dept)}
                 className={`p-1.5 sm:p-2 min-h-[52px] sm:min-h-[58px] text-left transition-all border flex flex-col justify-between rounded-[2px] ${
                   isSelected
-                    ? "bg-[#0F325E] border-brand text-white shadow-md ring-1 ring-brand"
-                    : "bg-[#0B2545] border-[#1E4E79] hover:bg-[#0F325E] text-slate-300"
+                    ? "bg-navy-surface border-brand text-white shadow-md ring-1 ring-brand"
+                    : "bg-navy border-navy-border hover:bg-navy-surface text-slate-300"
                 }`}
               >
                 <div className="flex items-center justify-between gap-1 w-full">
@@ -103,7 +103,7 @@ export function HospitalPipelineBar() {
                     className={`font-mono text-xs px-1 sm:px-1.5 py-0.5 rounded-[2px] ${
                       count > 0
                         ? "bg-brand text-navy-dark font-bold"
-                        : "bg-[#071B33] text-slate-400 border border-[#1E4E79]"
+                        : "bg-navy-dark text-slate-400 border border-navy-border"
                     }`}
                   >
                     {count}
