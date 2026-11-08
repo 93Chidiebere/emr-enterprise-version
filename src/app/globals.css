@@ -1,0 +1,301 @@
+@import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-paper: #FFFFFF;
+  --bg-warm: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --border-subtle: #D1D9E4;
+  --border-strong: #94A3B8;
+  --text-charcoal: #111111;
+  --text-muted: #475569;
+  --text-subtle: #64748B;
+  --accent-brand: #F59E0B;
+  --accent-brand-hover: #D97706;
+  --accent-brand-light: #FEF3C7;
+}
+
+body {
+  background-color: #071B33;
+  color: #111111;
+  font-family: 'Candara', 'Candana', 'Cabin', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Strict Editorial Typography with Candara / Candana */
+h1, h2, h3, .font-serif, .font-sans {
+  font-family: 'Candara', 'Candana', 'Cabin', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* High contrast gold button overrides for buttons with dark navy text */
+.bg-brand, button.bg-brand {
+  background-color: #F59E0B;
+  color: #071B33 !important;
+  font-weight: 700;
+}
+.bg-brand.text-paper, button.bg-brand.text-paper {
+  color: #071B33 !important;
+  font-weight: 700;
+}
+.bg-brand:hover, button.bg-brand:hover {
+  background-color: #D97706;
+  color: #071B33 !important;
+}
+
+/* Sharp Architectural Flat Edges - 0px to 2px max */
+button, input, select, textarea, .card-box {
+  border-radius: 2px;
+}
+
+/* High-contrast, clean focus outline */
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent-brand);
+  outline-offset: 1px;
+}
+
+/* Clean editorial scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B2545;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E4E79;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F59E0B;
+}
+
+/* Tactile Docket Borders */
+.docket-border {
+  border: 1px solid #D1D9E4;
+}
+
+.docket-border-b {
+  border-bottom: 1px solid #D1D9E4;
+}
+
+.docket-border-t {
+  border-top: 1px solid #D1D9E4;
+}
+
+.docket-border-r {
+  border-right: 1px solid #D1D9E4;
+}
+
+/* ---------- Accessibility & responsive helpers ---------- */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -100px;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  background: var(--accent-brand);
+  color: #071B33;
+  font-weight: 700;
+  font-size: 0.8rem;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* Respect users who ask for less motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (max-width: 767px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  .responsive-table,
+  .responsive-table tbody,
+  .responsive-table tr,
+  .responsive-table td {
+    display: block;
+    width: 100%;
+  }
+  .responsive-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .responsive-table tr {
+    padding: 0.75rem 1rem;
+  }
+  .responsive-table td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+    text-align: left !important;
+  }
+  .responsive-table td::before {
+    content: attr(data-label);
+    flex: 0 0 34%;
+    padding-top: 2px;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+  .responsive-table td[data-label="Actions"] {
+    flex-wrap: wrap;
+  }
+  .responsive-table td[data-label="Actions"]::before {
+    flex-basis: 100%;
+  }
+  .responsive-table td[data-label="Actions"] > div {
+    flex-wrap: wrap;
+    justify-content: flex-start !important;
+    width: 100%;
+  }
+  .responsive-table td[colspan] {
+    display: block;
+    text-align: center !important;
+  }
+  .responsive-table td[colspan]::before {
+    content: none;
+  }
+}
+
+/* The master directory has many columns, so it uses the stacked card layout up to 1100px (tablets) */
+@media (max-width: 1099px) {
+  .responsive-table-lg,
+  .responsive-table-lg tbody,
+  .responsive-table-lg tr,
+  .responsive-table-lg td {
+    display: block;
+    width: 100%;
+  }
+  .responsive-table-lg thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .responsive-table-lg tr {
+    padding: 0.75rem 1rem;
+  }
+  .responsive-table-lg td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+    text-align: left !important;
+  }
+  .responsive-table-lg td::before {
+    content: attr(data-label);
+    flex: 0 0 34%;
+    padding-top: 2px;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+  .responsive-table-lg td[data-label="Actions"] {
+    flex-wrap: wrap;
+  }
+  .responsive-table-lg td[data-label="Actions"]::before {
+    flex-basis: 100%;
+  }
+  .responsive-table-lg td[data-label="Actions"] > div {
+    flex-wrap: wrap;
+    justify-content: flex-start !important;
+    width: 100%;
+  }
+  .responsive-table-lg td[colspan] {
+    display: block;
+    text-align: center !important;
+  }
+  .responsive-table-lg td[colspan]::before {
+    content: none;
+  }
+}
+
+
+@media (max-width: 639px) {
+  .text-\[10px\] { font-size: 12px !important; line-height: 1.4 !important; }
+  .text-\[11px\] { font-size: 13px !important; line-height: 1.4 !important; }
+  .text-xs       { font-size: 14px !important; line-height: 1.5 !important; }
+  .text-sm       { font-size: 15px !important; line-height: 1.5 !important; }
+  .text-lg       { font-size: 19px !important; line-height: 1.35 !important; }
+}
+
+@layer base {
+  .font-mono {
+    font-weight: 600;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: #94A3B8;
+    opacity: 1;
+  }
+}
+
+/* ---------- Touch screens and narrow windows: comfortable tap targets ----------
+   Buttons and form fields get a 40px minimum height; icon-only buttons are 40px square. */
+@media (pointer: coarse), (max-width: 767px) {
+  button:not([data-compact]),
+  [role="button"],
+  [role="menuitemradio"],
+  [role="radio"],
+  select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+    min-height: 40px;
+  }
+  button:has(> svg:only-child) {
+    min-width: 40px;
+    justify-content: center;
+  }
+  main a[href],
+  header a[href] {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Dynamic viewport height keeps full-screen layouts correct when a phone's browser bar slides away */
+.min-h-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
